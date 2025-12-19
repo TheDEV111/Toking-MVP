@@ -228,7 +228,7 @@
       (stake-data (unwrap! (map-get? stakes tx-sender) err-not-found))
       (unlock-block (+ (get start-block stake-data) (get lock-period stake-data)))
     )
-    (asserts! (>= block-height unlock-block) err-stake-locked)
+    (asserts! (>= stacks-block-height unlock-block) err-stake-locked)
     
     ;; Claim any pending rewards first
     (try! (claim-rewards))
