@@ -1,0 +1,32 @@
+---
+id: 0
+name: Mainnet deployment
+network: mainnet
+stacks-node: "https://api.hiro.so"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoin.blockstack.com:8332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: reward-calculator
+            expected-sender: SPVQ61FEWR6M4HVAT3BNE07D4BNW6A1C2ACCNQ6F
+            cost: 10000
+            path: contracts/reward-calculator.clar
+            anchor-block-only: true
+            clarity-version: 4
+        - contract-publish:
+            contract-name: staking-pool
+            expected-sender: SPVQ61FEWR6M4HVAT3BNE07D4BNW6A1C2ACCNQ6F
+            cost: 10000
+            path: contracts/staking-pool.clar
+            anchor-block-only: true
+            clarity-version: 4
+        - contract-publish:
+            contract-name: unstaking-manager
+            expected-sender: SPVQ61FEWR6M4HVAT3BNE07D4BNW6A1C2ACCNQ6F
+            cost: 10000
+            path: contracts/unstaking-manager.clar
+            anchor-block-only: true
+            clarity-version: 4
+      epoch: "3.3"
