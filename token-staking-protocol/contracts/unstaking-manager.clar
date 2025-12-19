@@ -95,7 +95,7 @@
         (
           (completion-block (+ (get initiation-block request) cooldown-period))
         )
-        (ok (>= block-height completion-block))
+        (ok (>= stacks-block-height completion-block))
       )
     (ok false)
   )
@@ -108,9 +108,9 @@
         (
           (completion-block (+ (get initiation-block request) cooldown-period))
         )
-        (ok (if (>= block-height completion-block)
+        (ok (if (>= stacks-block-height completion-block)
           u0
-          (- completion-block block-height)
+          (- completion-block stacks-block-height)
         ))
       )
     err-not-found
@@ -153,7 +153,7 @@
     (
       (existing-request (map-get? unstaking-requests tx-sender))
       (unlock-block (+ stake-start-block lock-period))
-      (is-early (< block-height unlock-block))
+      (is-early (< stacks-block-height unlock-block))
       (penalty (if is-early (/ (* amount early-unstake-penalty) u100) u0))
     )
     (asserts! (is-none existing-request) err-already-exists)
@@ -161,7 +161,7 @@
     
     (map-set unstaking-requests tx-sender {
       amount: amount,
-      initiation-block: block-height,
+      initiation-block: stacks-block-height,
       is-early: is-early,
       penalty-amount: penalty,
       original-stake-start: stake-start-block,
@@ -174,8 +174,8 @@
       amount: amount,
       is-early: is-early,
       penalty: penalty,
-      cooldown-complete-at: (+ block-height cooldown-period),
-      block: block-height
+      cooldown-complete-at: (+ stacks-block-height cooldown-period),
+      block: stacks-block-height
     })
     
     (ok {
@@ -196,7 +196,7 @@
       (penalty (get penalty-amount request))
       (net-amount (- amount penalty))
     )
-    (asserts! (>= block-height completion-block) err-cooldown-not-complete)
+    (asserts! (>= stacks-block-height completion-block) err-cooldown-not-complete)
     
     ;; Record penalty if any
     (if (> penalty u0)
@@ -213,7 +213,7 @@
       {
         amount: amount,
         penalty: penalty,
-        completed-block: block-height,
+        completed-block: stacks-block-height,
         was-early: (get is-early request)
       }
     )
@@ -227,7 +227,7 @@
       amount: amount,
       penalty: penalty,
       net-amount: net-amount,
-      block: block-height
+      block: stacks-block-height
     })
     
     (ok net-amount)
@@ -245,7 +245,7 @@
       event: "unstake-cancelled",
       user: tx-sender,
       amount: (get amount request),
-      block: block-height
+      block: stacks-block-height
     })
     
     (ok true)
@@ -270,7 +270,7 @@
     (map-set emergency-withdrawals tx-sender {
       amount: amount,
       penalty: penalty,
-      block: block-height
+      block: stacks-block-height
     })
     
     (print {
@@ -279,7 +279,7 @@
       amount: amount,
       penalty: penalty,
       net-amount: net-amount,
-      block: block-height
+      block: stacks-block-height
     })
     
     (ok net-amount)
@@ -295,7 +295,7 @@
     (print {
       event: "emergency-mode-updated",
       enabled: enabled,
-      block: block-height
+      block: stacks-block-height
     })
     (ok true)
   )
@@ -343,7 +343,7 @@
       {
         amount: amount,
         penalty: penalty,
-        completed-block: block-height,
+        completed-block: stacks-block-height,
         was-early: (get is-early request)
       }
     )
@@ -357,7 +357,7 @@
       admin: tx-sender,
       amount: amount,
       penalty: penalty,
-      block: block-height
+      block: stacks-block-height
     })
     
     (ok net-amount)

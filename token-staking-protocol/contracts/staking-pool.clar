@@ -99,7 +99,7 @@
 (define-read-only (is-stake-unlocked (user principal))
   (match (map-get? stakes user)
     stake-data 
-      (ok (>= block-height (+ (get start-block stake-data) (get lock-period stake-data))))
+      (ok (>= stacks-block-height (+ (get start-block stake-data) (get lock-period stake-data))))
     (ok false)
   )
 )
@@ -111,9 +111,9 @@
         (
           (unlock-block (+ (get start-block stake-data) (get lock-period stake-data)))
         )
-        (ok (if (>= block-height unlock-block)
+        (ok (if (>= stacks-block-height unlock-block)
           u0
-          (- unlock-block block-height)
+          (- unlock-block stacks-block-height)
         ))
       )
     err-not-found
@@ -125,7 +125,7 @@
     stake-data
       (let
         (
-          (blocks-staked (- block-height (get last-claim-block stake-data)))
+          (blocks-staked (- stacks-block-height (get last-claim-block stake-data)))
           (base-rewards (/ (* (* (get amount stake-data) blocks-staked) (var-get base-reward-rate)) u10000))
           (multiplied-rewards (/ (* base-rewards (get multiplier stake-data)) u100))
         )
@@ -152,10 +152,10 @@
     
     (map-set stakes tx-sender {
       amount: amount,
-      start-block: block-height,
+      start-block: stacks-block-height,
       lock-period: lock-period,
       rewards-claimed: u0,
-      last-claim-block: block-height,
+      last-claim-block: stacks-block-height,
       multiplier: multiplier,
       auto-compound: auto-compound
     })
@@ -169,7 +169,7 @@
       amount: amount,
       lock-period: lock-period,
       multiplier: multiplier,
-      block: block-height
+      block: stacks-block-height
     })
     
     (ok true)
@@ -192,7 +192,7 @@
         (merge stake-data {
           amount: (+ (get amount stake-data) pending-rewards),
           rewards-claimed: (+ (get rewards-claimed stake-data) pending-rewards),
-          last-claim-block: block-height
+          last-claim-block: stacks-block-height
         })
       )
       ;; Regular claim: transfer rewards to user
@@ -202,7 +202,7 @@
         (map-set stakes tx-sender 
           (merge stake-data {
             rewards-claimed: (+ (get rewards-claimed stake-data) pending-rewards),
-            last-claim-block: block-height
+            last-claim-block: stacks-block-height
           })
         )
       )
@@ -215,7 +215,7 @@
       user: tx-sender,
       amount: pending-rewards,
       auto-compounded: (get auto-compound stake-data),
-      block: block-height
+      block: stacks-block-height
     })
     
     (ok pending-rewards)
@@ -247,7 +247,7 @@
         {
           amount: amount,
           start-block: (get start-block final-stake),
-          end-block: block-height,
+          end-block: stacks-block-height,
           rewards-earned: (get rewards-claimed final-stake)
         }
       )
@@ -262,7 +262,7 @@
         user: tx-sender,
         amount: amount,
         total-rewards: (get rewards-claimed final-stake),
-        block: block-height
+        block: stacks-block-height
       })
       
       (ok amount)

@@ -90,6 +90,7 @@
 )
 
 ;; Calculate rewards with auto-compound
+;; Simplified calculation without recursion
 (define-read-only (calculate-compound-rewards 
   (principal-amount uint) 
   (blocks-staked uint) 
@@ -98,26 +99,12 @@
   (let
     (
       (multiplier (get-period-multiplier lock-period))
-      (rate-per-period (/ (var-get reward-rate) compound-frequency))
-      (periods (/ blocks-staked compound-frequency))
+      (base-rewards (/ (* (* principal-amount blocks-staked) (var-get reward-rate)) precision))
+      (multiplied-rewards (/ (* base-rewards multiplier) u100))
+      ;; Add approximate compound bonus (10% of base rewards)
+      (compound-bonus (/ multiplied-rewards u10))
     )
-    ;; Simplified compound calculation
-    (ok (calculate-compound-iterative principal-amount rate-per-period periods multiplier))
-  )
-)
-
-;; Helper function for compound calculation
-(define-private (calculate-compound-iterative (principal uint) (rate uint) (periods uint) (multiplier uint))
-  (if (is-eq periods u0)
-    principal
-    (let
-      (
-        (period-return (/ (* principal rate) precision))
-        (multiplied-return (/ (* period-return multiplier) u100))
-        (new-principal (+ principal multiplied-return))
-      )
-      (calculate-compound-iterative new-principal rate (- periods u1) multiplier)
-    )
+    (ok (+ multiplied-rewards compound-bonus))
   )
 )
 
@@ -145,13 +132,13 @@
 (define-read-only (calculate-effective-apy (lock-period uint) (compound-frequency uint))
   (let
     (
-      (base-apy (unwrap! (get-apy lock-period) (err err-invalid-period)))
+      (calculated-apy (unwrap! (get-apy lock-period) (err err-invalid-period)))
       (periods-per-year (/ blocks-per-year compound-frequency))
-      (rate-per-period (/ base-apy periods-per-year))
+      (rate-per-period (/ calculated-apy periods-per-year))
     )
     ;; Effective APY = ((1 + r/n)^n - 1) * 100
     ;; Simplified for Clarity constraints
-    (ok (+ base-apy (/ base-apy u10))) ;; Approximate bonus for compounding
+    (ok (+ calculated-apy (/ calculated-apy u10))) ;; Approximate bonus for compounding
   )
 )
 
